@@ -5,6 +5,7 @@ require "execjs/johnson_runtime"
 require "execjs/mustang_runtime"
 require "execjs/ruby_racer_runtime"
 require "execjs/ruby_rhino_runtime"
+require "execjs/ruby_grope_runtime"
 
 module ExecJS
   module Runtimes
@@ -17,6 +18,8 @@ module ExecJS
     Johnson = JohnsonRuntime.new
 
     Mustang = MustangRuntime.new
+
+    Grope = GropeRuntime.new
 
     Node = ExternalRuntime.new(
       :name        => "Node.js (V8)",
@@ -43,7 +46,6 @@ module ExecJS
       :runner_path => ExecJS.root + "/support/jscript_runner.js",
       :encoding    => 'UTF-16LE' # CScript with //U returns UTF-16LE
     )
-
 
     def self.autodetect
       from_environment || best_available ||
@@ -82,7 +84,8 @@ module ExecJS
         Node,
         JavaScriptCore,
         SpiderMonkey,
-        JScript
+        JScript,
+        Grope
       ]
     end
   end
