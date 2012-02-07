@@ -13,7 +13,6 @@ module ExecJS
 
       def exec(source, options = {})
         source = source.encode('UTF-8') if source.respond_to?(:encode)
-
         if /\S/ =~ source
           eval "(function(){#{source}})()", options
         end
@@ -34,17 +33,20 @@ module ExecJS
       end
 
       def call(properties, *args)
-      #   unbox @rhino_context.eval(properties).call(*args)
-      # rescue ::Rhino::JavascriptError => e
-      #   if e.message == "syntax error"
-      #     raise RuntimeError, e.message
-      #   else
-      #     raise ProgramError, e.message
-      #   end
+        f = @env.eval('return ' + properties)
+        raise ProgramError if f.wso.class == OSX::WebUndefined
+
+        unbox @env.eval('return function() { return JSON.stringify(' +
+          properties +
+          '.apply(this, arguments))}').
+          call(f, *args)
+      rescue => e
+        raise ProgramError
       end
 
       def unbox(value)
-        JSON.parse('[%s]' % value.to_s)[0]
+        value = '[%s]' % value.to_s
+        JSON.parse(value)[0]
       rescue JSON::ParserError
         nil
       end
